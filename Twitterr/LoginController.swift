@@ -10,9 +10,10 @@ import UIKit
 
 class LoginController: UIViewController {
 
+    @IBOutlet weak var login: UIButton!
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        login.layer.cornerRadius = 5
         // Do any additional setup after loading the view.
     }
 
@@ -21,6 +22,14 @@ class LoginController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    @IBAction func onLogin(_ sender: Any) {
+        TwitterApi.shared?.login(success: { 
+            self.performSegue(withIdentifier: "postLogin", sender: nil)
+        }, failure: { (error) in
+            print("Login Error : \(error.localizedDescription)")
+        })
+
+    }
 
     /*
     // MARK: - Navigation

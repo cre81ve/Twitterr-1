@@ -7,3 +7,13 @@
 //
 
 import Foundation
+import UIKit
+
+class Style {
+
+    
+    class func styleNav(viewController:UIViewController) {
+        viewController.navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "twitter"))
+
+    }
+}
