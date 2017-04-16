@@ -95,7 +95,7 @@ class Tweet: NSObject, NSCoding {
     class func tweetsWith(dictionaryArray: [NSDictionary]) -> [Tweet] {
         var tweets: [Tweet] = []
         
-        for dictionary in dictionaryArray {
+        for dictionary in dictionaryArray { 
             let tweet = Tweet(dictionary: dictionary)
             if tweet.inReplyToUser != nil {
                 let parameters = ["user_id" : tweet.inReplyToUser]
