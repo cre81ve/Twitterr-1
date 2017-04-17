@@ -34,57 +34,10 @@ class TweetCell: UITableViewCell {
 
     var tweet:Tweet!  {
         didSet {
-            
             if(tweet != nil) {
-                tweetText.customize { (label) in
-                    label.text = tweet.text
-                    if let replyuser = tweet.replyUser?.name  {
-                        label.text = "Replying to @\(replyuser)" + tweet.text!
-                    }
-                    label.numberOfLines = 0
-                    label.lineSpacing = 1
-                    label.hashtagColor = UIColor(rgb: 0x4099FF)
-                    label.mentionColor = UIColor(rgb: 0x4099FF)
-                    label.URLColor = UIColor(rgb: 0x4099FF)
-                    label.URLSelectedColor = UIColor(red: 82.0/255, green: 190.0/255, blue: 41.0/255, alpha: 1)
-                }
-                
-                userName.text = tweet?.userScreenName
-                
-                userId.text = tweet?.userName
-                userProfileImageUrl.setImageWith((tweet?.userProfileImage)!)
-                userProfileImageUrl.layer.cornerRadius = 5
-                userProfileImageUrl.clipsToBounds = true
-
-
-                if let retweeteduser = tweet?.retweetUserName {
-                    userRetweeted.text = retweeteduser + " retweeted"
-                    retweetedIconHeight.constant = 17
-                    retweetedHeight.constant = 15
-                }else{
-                    retweetedIconHeight.constant = 0
-                    retweetedHeight.constant = 0
-                }
-                
-                var retweetedCount = 0
-                if( tweet.retweetCount != 0) {
-                    retweetedCount = tweet.retweetCount
-                }
-                var favCount = 0
-                if( tweet.favouritesCount != 0) {
-                    favCount = tweet.favouritesCount
-                }
-                
-                
-                favoriteCount.text = favCount != 0 ? "\(favCount)" :""
-                reTweetCount.text = retweetedCount != 0 ? "\(retweetedCount)" :""
-                
-                if(tweet.favorited)! {
-                    makeFavorite(count: favCount)
-                }
-                if(tweet.retweeted)! {
-                    makeRetweet(count: retweetedCount)
-                }
+                layoutTweetText()
+                layoutUserDetails()
+                layoutFavAndRetweets()
                 tweetedAgo.text = "•\(tweet?.timeAgo ?? "")"
             }
         }
@@ -93,21 +46,13 @@ class TweetCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
-        
         accessoryType = .none
         userName.sizeToFit()
-
-
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
-    
-    
     
     
     @IBAction func onReply(_ sender: Any) {
@@ -117,64 +62,25 @@ class TweetCell: UITableViewCell {
     }
     
     @IBAction func onFav(_ sender: Any) {
-
-        tweet.favorite(success: { (tweetArg) in
-            var finalCount = 0
-            if let currentCount = self.favoriteCount.text {
-                var currentCountInt = Int(currentCount)
-                if(currentCountInt == nil) {
-                    currentCountInt = 0
-                }
-                finalCount = currentCountInt!+1
-            }
-            self.makeFavorite(count: finalCount)
+        if(!tweet.favorited!) {
+           fav()
+        }else{
+           unfav()
+        }
             
-        }, failure: { (error) in
-            print("Error in favorite \(error.localizedDescription)")
-        })
-        
-    }
-    
-    func makeFavorite(count:Int) {
-        self.favoriteCount.textColor = UIColor.red
-        if(count != 0) {
-            self.favoriteCount.text = "\(count)"
-            self.favHeart.setImage(#imageLiteral(resourceName: "favred"), for: .normal)
-
-        }else{
-            self.favoriteCount.text = ""
-        }
-    }
-    
-    
-    func makeRetweet(count:Int) {
-        self.reTweetCount.textColor = UIColor.green
-        if(count != 0) {
-            self.reTweetCount.text = "\(count)"
-            self.retweetButton.setImage(#imageLiteral(resourceName: "retweetgreen"), for: .normal)
-
-        }else{
-            self.reTweetCount.text = ""
-        }
     }
     
     
     @IBAction func onRetweet(_ sender: Any) {
-        tweet.reTweet(success: { (tweetArg) in
-            self.tweet.retweeted = true
-            var finalCount = 0
-            if let currentCount = self.reTweetCount.text {
-                var currentCountInt = Int(currentCount)
-                if(currentCountInt == nil) {
-                    currentCountInt = 0
-                }
-                finalCount = currentCountInt!+1
-            }
-            self.makeRetweet(count: finalCount)
-        }, failure: { (error) in
-            print("failed to retweet")
-        })
+        
+        if(!tweet.retweeted!) {
+            retweet()
+        }else{
+            unretweet()
+        }
     }
+    
+ 
     
     override func prepareForReuse() {
         tweet = nil
@@ -186,4 +92,147 @@ class TweetCell: UITableViewCell {
         self.favoriteCount.textColor = UIColor.gray
     }
 
+}
+//Rendering and Layout of Cell
+
+extension TweetCell {
+    
+    func layoutFavAndRetweets(){
+        if let retweeteduser = tweet?.retweetUserName {
+            userRetweeted.text = retweeteduser + " retweeted"
+            retweetedIconHeight.constant = 17
+            retweetedHeight.constant = 15
+        }else{
+            retweetedIconHeight.constant = 0
+            retweetedHeight.constant = 0
+        }
+        
+        var retweetedCount = 0
+        if( tweet.retweetCount != 0) {
+            retweetedCount = tweet.retweetCount
+        }
+        var favCount = 0
+        if( tweet.favouritesCount != 0) {
+            favCount = tweet.favouritesCount
+        }
+        
+        favoriteCount.text = favCount != 0 ? "\(favCount)" :""
+        reTweetCount.text = retweetedCount != 0 ? "\(retweetedCount)" :""
+        
+        if(tweet.favorited)! {
+            makeFavorite(count: favCount-1, fav: true)
+        }
+        if(tweet.retweeted)! {
+            makeRetweet(count: retweetedCount-1, retweeting: true)
+        }
+        
+    }
+    
+    func layoutUserDetails(){
+        userName.text = tweet?.userScreenName
+        userId.text = tweet?.userName
+        userProfileImageUrl.setImageWith((tweet?.userProfileImage)!)
+        userProfileImageUrl.layer.cornerRadius = 5
+        userProfileImageUrl.clipsToBounds = true
+    }
+    
+    func layoutTweetText() {
+        tweetText.customize { (label) in
+            label.text = tweet.text
+            if let replyuser = tweet.replyUser?.name  {
+                label.text = "Replying to @\(replyuser)" + tweet.text!
+            }
+            Style.styleTwitterAttributedLabelForCell(label: label)
+            
+        }
+    }
+    
+    
+}
+
+
+
+//Retweet Actions
+
+extension TweetCell {
+    
+    
+    func retweet() {
+        tweet.reTweet(success: { (tweetArg) in
+            self.tweet  = tweetArg
+            self.tweet.retweeted = true
+            self.makeRetweet(count: self.tweet.retweetCount,retweeting: true)
+            self.tweet.retweeted = true
+        }, failure: { (error) in
+            print("failed to retweet")
+        })
+        
+    }
+    
+    
+    func unretweet() {
+        tweet.unReTweet(success: { (tweetArg) in
+            self.tweet = tweetArg
+            self.tweet.retweeted = false
+            self.makeRetweet(count: self.tweet.retweetCount,retweeting: false)
+        }, failure: { (error) in
+            print("failed to retweet")
+        })
+    }
+    
+    func fav() {
+        tweet.favorite(success: { (tweetArg) in
+            self.tweet = tweetArg
+            self.makeFavorite(count: self.tweet.favouritesCount,fav: true)
+            self.tweet.favorited = true
+            
+        }, failure: { (error) in
+            print("Error in favorite \(error.localizedDescription)")
+        })
+        
+    }
+    
+    
+    func unfav() {
+        tweet.unfavorite(success: { (tweetArg) in
+            self.tweet = tweetArg
+            self.makeFavorite(count: self.tweet.favouritesCount,fav: false)
+            self.tweet.favorited = false
+        }, failure: { (error) in
+            print("Error in favorite \(error.localizedDescription)")
+        })
+    }
+    
+    
+    
+    
+    
+    func makeFavorite(count:Int ,fav:Bool) {
+        let countToLabel = fav ? (count+1) : (count - 1)
+        let color = fav ? UIColor.red : UIColor.gray
+        self.favoriteCount.textColor = color
+        let image = fav ? #imageLiteral(resourceName: "favred") : #imageLiteral(resourceName: "favorite")
+        self.favoriteCount.text = "\(countToLabel)"
+        self.favHeart.setImage(image, for: .normal)
+        if(countToLabel == 0) {
+            self.favoriteCount.text = ""
+        }
+        
+    }
+    
+    
+    func makeRetweet(count:Int,retweeting:Bool) {
+        
+        let countToLabel = retweeting ? (count+1) : (count - 1)
+        let color = retweeting ? UIColor.green : UIColor.gray
+        self.reTweetCount.textColor = color
+        let image = retweeting ? #imageLiteral(resourceName: "retweetgreen") : #imageLiteral(resourceName: "retweet")
+        self.reTweetCount.text = "\(countToLabel)"
+        self.retweetButton.setImage(image, for: .normal)
+        if(countToLabel == 0) {
+            self.reTweetCount.text = ""
+        }
+        
+    }
+    
 }

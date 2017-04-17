@@ -24,12 +24,13 @@ class Tweet: NSObject, NSCoding {
     var userProfileImage: URL?
     var retweeted: Bool?
     var favorited: Bool?
-
+    var retweetedStatus:NSDictionary?
     var retweetUserName: String?
     var retweetUserScreenName: String?
     var timeAgo:String?
     var inReplyToUser:String?
     var replyUser:User?
+    var retweetedId:String?
     
     //for pagination
     static var lastTweetId:String?
@@ -70,6 +71,7 @@ class Tweet: NSObject, NSCoding {
         }
         let retweetStatus = dictionary["retweeted_status"] as? NSDictionary
         if retweetStatus != nil {
+            self.retweetedStatus = retweetStatus
             let user = retweetStatus?["user"] as? NSDictionary
             userName = user?["screen_name"] as? String
             userScreenName = user?["name"] as? String
@@ -78,6 +80,7 @@ class Tweet: NSObject, NSCoding {
             let retweetUser = dictionary["user"] as? NSDictionary
             retweetUserName = retweetUser?["screen_name"] as? String
             retweetUserScreenName = retweetUser?["name"] as? String
+            retweetedId = retweetStatus?["id_str"] as? String
         }
         else {
             let user = dictionary["user"] as? NSDictionary
@@ -95,7 +98,7 @@ class Tweet: NSObject, NSCoding {
     class func tweetsWith(dictionaryArray: [NSDictionary]) -> [Tweet] {
         var tweets: [Tweet] = []
         
-        for dictionary in dictionaryArray { 
+        for dictionary in dictionaryArray {
             let tweet = Tweet(dictionary: dictionary)
             if tweet.inReplyToUser != nil {
                 let parameters = ["user_id" : tweet.inReplyToUser]
@@ -118,6 +121,15 @@ class Tweet: NSObject, NSCoding {
                 failure(error)
         })
     }
+    
+    func unfavorite(success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        Tweet.api?.unfavorite(tweet: self, success: { (tweetArg) in
+            success(tweetArg)
+        }, failure: { (error) in
+            failure(error)
+        })
+    }
+
 
     func reTweet(success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
         Tweet.api?.reTweet(tweet: self, success: { (tweetArg) in
@@ -127,6 +139,13 @@ class Tweet: NSObject, NSCoding {
         })
     }
     
+    func unReTweet(success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        Tweet.api?.getAndUnRetweet(tweet: self, success: { (tweetArg) in
+            success(tweetArg)
+        }, failure: { (error) in
+            failure(error)
+        })
+    }
     
     class func home(parameters: [String: AnyObject]? ,success: @escaping ([Tweet]) -> (), failure: @escaping (Error) -> ()) {
         Tweet.api?.home(parameters: parameters!, success: { (newtweets) in

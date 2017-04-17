@@ -27,9 +27,14 @@ let homeUrl = "/1.1/statuses/home_timeline.json"
 let userUrl = "/1.1/users/lookup.json"
 
 let retweetUrl = "/1.1/statuses/retweet/"
+let unretweetUrl = "/1.1/statuses/unretweet/"
 let createFavoriteUrl = "/1.1/favorites/create.json"
+let destroyFavoriteUrl = "/1.1/favorites/destroy.json"
 let listFavoriteUrl = "/1.1/favorites/list.json"
 let tweetUrl = "/1.1/statuses/update.json"
+//let full_tweet = GET("https://api.twitter.com/1.1/statuses/show/" + original_tweet_id + "json?include_my_retweet=1")
+let fullTweetUrl = "/1.1/statuses/show/"
+//let retweet_id = full_tweet.current_user_retweet.id_str
 
 //MARK : App Config
 let appUrlOAuthCallback = "twitterr://oauth"
@@ -88,7 +93,7 @@ class TwitterApi:BDBOAuth1SessionManager{
             success(user)
             
         }, failure: { (task: URLSessionDataTask?, error: Error?) in
-            print("error verifying credentials")
+            print("Error in verifying")
             failure(error!)
         })
     }
@@ -149,10 +154,75 @@ class TwitterApi:BDBOAuth1SessionManager{
         post(retweetUrl + tweet.id!+".json", parameters: nil, success: { (task:  URLSessionDataTask, response: Any?) in
             success(Tweet.init(dictionary: response as! NSDictionary))
         }, failure: { (task: URLSessionDataTask?, error: Error) in
-            print("\nError posting tweet1:: \(error) \n\n")
+            print("\nError posting retweet:: \(error) \n\n")
             failure(error)
         })
     }
+    
+    
+    //These  apis take long time to reflect onserver.
+    func getAndUnRetweet(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        
+        var originalTweetId = tweet.id
+        if(!tweet.retweeted!) {
+            print("Will get auth Failure")
+        }
+        else{
+            if tweet.retweetedStatus != nil  {
+                originalTweetId = tweet.id
+            }else{
+                originalTweetId = tweet.retweetedId
+            }
+        }
+        
+        var idToUnTweet = originalTweetId
+        if(idToUnTweet != nil) {
+            let parameters = ["include_my_retweet" : "1"]
+
+             get(fullTweetUrl+idToUnTweet!+".json", parameters: parameters, success: { (task, response) in
+                let dictionary = response as! NSDictionary
+                let currentUserRetweetDetails = dictionary["current_user_retweet"] as? NSDictionary
+                if let curd = currentUserRetweetDetails {
+                    idToUnTweet = curd["id_str"] as? String
+                }
+                self.unRetweet(tweetId: idToUnTweet!, success: { (tweet) in
+                    print("success")
+                    success(tweet)
+                }, failure: { (error) in
+                    failure(error)
+                    print("Failure")
+                })
+                
+            }) { (task, error) in
+                print("Error \(error.localizedDescription)")
+            }
+        }
+        
+        
+       
+    }
+    
+    func showFull(tweetId: String, success: @escaping (NSDictionary) -> (), failure: @escaping (Error) -> ()) {
+        let parameters = ["include_my_retweet" : "1"]
+        get(fullTweetUrl+tweetId+".json", parameters: parameters, success: { (task, response) in
+            let dictionary = response as! NSDictionary
+            success(dictionary)
+        }) { (task, error) in
+            print("Error \(error.localizedDescription)")
+        }
+    }
+    
+    
+    
+    func unRetweet(tweetId: String, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        post(unretweetUrl + tweetId+".json", parameters: nil, success: { (task:  URLSessionDataTask, response: Any?) in
+            success(Tweet.init(dictionary: response as! NSDictionary))
+        }, failure: { (task: URLSessionDataTask?, error: Error) in
+            print("\nError posting unretweetUrl:: \(error) \n\n")
+            failure(error)
+        })
+    }
+    
     
     
     func favorite(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
@@ -163,6 +233,17 @@ class TwitterApi:BDBOAuth1SessionManager{
             failure(error)
         })
     }
+    
+    
+    func unfavorite(tweet: Tweet, success: @escaping (Tweet) -> (), failure: @escaping (Error) -> ()) {
+        let parameters = ["id": tweet.id]
+        post(destroyFavoriteUrl, parameters: parameters, success: { (task:  URLSessionDataTask, response: Any?) in
+            success(Tweet.init(dictionary: response as! NSDictionary))
+        }, failure: { (task: URLSessionDataTask?, error: Error) in
+            failure(error)
+        })
+    }
+    
     
     func saveTweets(tweets:[Tweet]){
         let tweetsData = NSKeyedArchiver.archivedData(withRootObject: tweets)
@@ -175,7 +256,7 @@ class TwitterApi:BDBOAuth1SessionManager{
             let tweetsArray = NSKeyedUnarchiver.unarchiveObject(with: tweetsData as Data) as? [Tweet]
             
             if let tweetsArray = tweetsArray {
-                print("Count - \(tweetsArray.count)")
+                print("Number of tweets to save \(tweetsArray.count)")
                 return tweetsArray
             }
             

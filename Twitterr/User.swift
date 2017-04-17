@@ -39,20 +39,23 @@ class User: NSObject {
         get{
             if _current == nil {
                 let defaults = UserDefaults.standard
-                let userData = defaults.object(forKey: currentUserDataKey) as? Data
+                let userData =  defaults.object(forKey: currentUserDataKey) as? Data
                 if let userData = userData {
-                    let dictionary = try! JSONSerialization.jsonObject(with: userData, options:[]) // as! NSDictionary
-                    _current = User.init(dictionary: dictionary as! NSDictionary)
+                    let dictionary = NSKeyedUnarchiver.unarchiveObject(with: userData)
+                    if(dictionary != nil){
+                        _current = User.init(dictionary: dictionary as! NSDictionary)
+                    }else{
+                        TwitterApi.shared?.logout()
+                    }
                 }
             }
             return _current
         }
         set(user){
             _current = user
-            
             let defaults = UserDefaults.standard
             if let user = user {
-                let data = try! JSONSerialization.data(withJSONObject: user.dictionary!, options: [])
+                let data = NSKeyedArchiver.archivedData(withRootObject: user.dictionary!)
                 defaults.set(data, forKey: currentUserDataKey)
             }
             else {
