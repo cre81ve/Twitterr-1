@@ -20,29 +20,36 @@ The following **optional** features are implemented:
 
 - [x] When composing, you should have a countdown in the upper right for the tweet limit.
 - [x] After creating a new tweet, a user should be able to view it in the timeline immediately without refetching the timeline from the network.
-- [x] Retweeting and favoriting should increment the retweet and favorite count.
+- [x] Retweeting and favoriting should increment the retweet and favorite count. (Does on server and client)
 - [x] User should be able to unretweet and unfavorite and should decrement the retweet and favorite count.
 - [x] Replies should be prefixed with the username and the reply_id should be set when posting the tweet,
 - [x] User can load more tweets once they reach the bottom of the feed using infinite loading similar to the actual Twitter client.
 
 The following **additional** features are implemented:
 
-- [ ] List anything else that you can get done to improve the app functionality!
+- [x] Attributed Text - For Labels which shows mentions/hashtags/ and urls.
+- [x] Style nav/login pages and some ux and auto layout throughout.
+- [x] Retweet/Favorite available on home timeline as well.
+
+- Used UIStackViews which are easy for auto layouts , Model and UI synced across the app through delegates and notifications.
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
+- This was really great app to learn and master - autolayout ,networking , and communication/sharing across the app.
 
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='https://github.com/eadencode/Twitterr/blob/master/twitterrgif.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
 Describe any challenges encountered while building the app.
+- 429 requests , twitter api documentation is not easy to perceive and to answer some queries.
+
 
 ## Third Party
 - **Pods** - ICSPullToRefresh | MBProgressHUD | BDBOAuth1Manager | AFNetworking | ActiveLabel  - attributed to the respective distribution licenses.
