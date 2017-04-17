@@ -49,6 +49,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 Describe any challenges encountered while building the app.
 - 429 requests , twitter api documentation is not easy to perceive and to answer some queries.
+- Counts of retweets and favorites change on success callbacks - from twitter ,so spent lot of time adjusting or not adjusting them. Or dont use success call back tweet.
 
 
 ## Third Party
