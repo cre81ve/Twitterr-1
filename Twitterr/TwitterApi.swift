@@ -194,10 +194,10 @@ class TwitterApi:BDBOAuth1SessionManager{
                 })
                 
             }) { (task, error) in
+                failure(error)
                 print("Error \(error.localizedDescription)")
             }
         }
-        
         
        
     }

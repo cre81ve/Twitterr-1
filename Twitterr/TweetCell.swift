@@ -13,6 +13,7 @@ protocol RetweetProtocol  {
     func onRetweet(tweet:Tweet)
 }
 
+
 class TweetCell: UITableViewCell {
 
     @IBOutlet weak var retweetedIconHeight: NSLayoutConstraint!
@@ -31,7 +32,7 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var retweetStack: UIStackView!
     @IBOutlet weak var favStack: UIStackView!
     var delegate:RetweetProtocol?
-
+    var fromAction:Bool = false
     var tweet:Tweet!  {
         didSet {
             if(tweet != nil) {
@@ -118,14 +119,8 @@ extension TweetCell {
         
         favoriteCount.text = favCount != 0 ? "\(favCount)" :""
         reTweetCount.text = retweetedCount != 0 ? "\(retweetedCount)" :""
-        
-        if(tweet.favorited)! {
-            makeFavorite(count: favCount-1, fav: true)
-        }
-        if(tweet.retweeted)! {
-            makeRetweet(count: retweetedCount-1, retweeting: true)
-        }
-        
+        makeFavorite(count: favCount, fav: tweet.favorited!)
+        makeRetweet(count: retweetedCount, retweeting: tweet.retweeted!)
     }
     
     func layoutUserDetails(){
@@ -159,10 +154,11 @@ extension TweetCell {
     
     func retweet() {
         tweet.reTweet(success: { (tweetArg) in
-            self.tweet  = tweetArg
+            let tweetArgToAssign  = tweetArg
+            tweetArgToAssign.retweetCount = tweetArgToAssign.retweetCount + 1
+            self.tweet  = tweetArgToAssign
             self.tweet.retweeted = true
-            self.makeRetweet(count: self.tweet.retweetCount,retweeting: true)
-            self.tweet.retweeted = true
+            self.makeRetweet(count: self.tweet.retweetCount + 1,retweeting: true)
         }, failure: { (error) in
             print("failed to retweet")
         })
@@ -171,19 +167,27 @@ extension TweetCell {
     
     
     func unretweet() {
-        tweet.unReTweet(success: { (tweetArg) in
-            self.tweet = tweetArg
-            self.tweet.retweeted = false
-            self.makeRetweet(count: self.tweet.retweetCount,retweeting: false)
-        }, failure: { (error) in
-            print("failed to retweet")
-        })
+        if( self.tweet.retweetCount != 0) {
+            tweet.unReTweet(success: { (tweetArg) in
+                    let tweetArgToAssign  = tweetArg
+                    tweetArgToAssign.retweetCount = tweetArgToAssign.retweetCount - 1
+                    self.tweet = tweetArgToAssign
+                    self.tweet.retweeted = false
+                    self.makeRetweet(count: self.tweet.retweetCount ,retweeting: false)
+                
+            }, failure: { (error) in
+                print("failed to retweet")
+            })
+        }
     }
     
     func fav() {
         tweet.favorite(success: { (tweetArg) in
-            self.tweet = tweetArg
-            self.makeFavorite(count: self.tweet.favouritesCount,fav: true)
+            let tweetArgToAssign  = tweetArg
+            tweetArgToAssign.favouritesCount = tweetArgToAssign.favouritesCount + 1
+
+            self.tweet = tweetArgToAssign
+            self.makeFavorite(count: self.tweet.favouritesCount ,fav: true)
             self.tweet.favorited = true
             
         }, failure: { (error) in
@@ -194,13 +198,18 @@ extension TweetCell {
     
     
     func unfav() {
-        tweet.unfavorite(success: { (tweetArg) in
-            self.tweet = tweetArg
-            self.makeFavorite(count: self.tweet.favouritesCount,fav: false)
-            self.tweet.favorited = false
-        }, failure: { (error) in
-            print("Error in favorite \(error.localizedDescription)")
-        })
+        if( self.tweet.favouritesCount != 0) {
+            tweet.unfavorite(success: { (tweetArg) in
+                    let tweetArgToAssign  = tweetArg
+                    tweetArgToAssign.favouritesCount = tweetArgToAssign.favouritesCount - 1
+                    self.tweet = tweetArgToAssign
+                    self.makeFavorite(count: self.tweet.favouritesCount,fav: false)
+                    self.tweet.favorited = false
+                
+            }, failure: { (error) in
+                print("Error in favorite \(error.localizedDescription)")
+            })
+        }
     }
     
     
@@ -208,7 +217,7 @@ extension TweetCell {
     
     
     func makeFavorite(count:Int ,fav:Bool) {
-        let countToLabel = fav ? (count+1) : (count - 1)
+        let countToLabel = count
         let color = fav ? UIColor.red : UIColor.gray
         self.favoriteCount.textColor = color
         let image = fav ? #imageLiteral(resourceName: "favred") : #imageLiteral(resourceName: "favorite")
@@ -223,7 +232,7 @@ extension TweetCell {
     
     func makeRetweet(count:Int,retweeting:Bool) {
         
-        let countToLabel = retweeting ? (count+1) : (count - 1)
+        let countToLabel = count
         let color = retweeting ? UIColor.green : UIColor.gray
         self.reTweetCount.textColor = color
         let image = retweeting ? #imageLiteral(resourceName: "retweetgreen") : #imageLiteral(resourceName: "retweet")
@@ -234,5 +243,7 @@ extension TweetCell {
         }
         
     }
+
+
     
 }
