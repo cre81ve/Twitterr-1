@@ -1,4 +1,4 @@
-# Project 3 - *Name of App Here*
+# Project 3 - *Twitterr*
 
 **Twitterr** is a basic twitter app to read and compose tweets from the [Twitter API](https://apps.twitter.com/).
 
@@ -44,9 +44,9 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 Describe any challenges encountered while building the app.
 
-
-**Pods** - ICSPullToRefresh | MBProgressHUD | BDBOAuth1Manager | AFNetworking | ActiveLabel  - attributed to the respective distribution licenses.
-**Icons** - Icons8 and twitter brand resources.
+## Third Party
+- **Pods** - ICSPullToRefresh | MBProgressHUD | BDBOAuth1Manager | AFNetworking | ActiveLabel  - attributed to the respective distribution licenses.
+- **Icons** - Icons8 and twitter brand resources.
 
 ## License
 
