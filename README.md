@@ -39,9 +39,14 @@ Please list two areas of the assignment you'd like to **discuss further with you
 
 ## Video Walkthrough
 
-Here's a walkthrough of implemented user stories:
+Here's a walkthrough of implemented user stories: (2 Gifs) 
 
+## Main Walk through:
+https://github.com/eadencode/Twitterr/blob/master/twitterrgif2.gif
 <img src='https://github.com/eadencode/Twitterr/blob/master/twitterrgif.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+
+## Detail Screen
+<img src='https://github.com/eadencode/Twitterr/blob/master/twitterrgif2.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
