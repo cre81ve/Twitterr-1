@@ -2,7 +2,7 @@
 
 **Twitterr** is a basic twitter app to read and compose tweets from the [Twitter API](https://apps.twitter.com/).
 
-Time spent: **13** hours spent in total
+Time spent: **16** hours spent in total
 
 ## User Stories
 
